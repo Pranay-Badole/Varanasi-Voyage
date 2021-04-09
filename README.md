@@ -16,7 +16,12 @@ For help getting started with Flutter, view our
 samples, guidance on mobile development, and a full API reference.
 
 
-Please add your api key in 
+# Please add your api key in this files
+
+     Replace "your_Api_Key" with your google API
+     
      - lib/configMaps.dart
+     
      - android/app/src/main/AndroidManifest.xml
+     
      - ios/Runner/AppDelegate.swift
