@@ -404,9 +404,9 @@ class _MainScreenState extends State<MainScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Text("Distance : ",
-                          style: TextStyle(color: Colors.white)),
-                  Text((tripDirectionDetails!=null?tripDirectionDetails.distanceText:"0"),style: TextStyle(color: Colors.white)),
+                      Text("Distance",style: TextStyle(color: Colors.white)),
+                      Text(":",style: TextStyle(color: Colors.white)),
+                      Text((tripDirectionDetails!=null?tripDirectionDetails.distanceText:"0"),style: TextStyle(color: Colors.white)),
 
                     ],
                   ),
