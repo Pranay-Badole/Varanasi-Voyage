@@ -9,6 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:tourist_app/Allscreens/searchScreen.dart';
 import 'package:tourist_app/Assistants/assistantMethods.dart';
 import 'package:tourist_app/DataHandler/appData.dart';
+import 'package:tourist_app/Models/directDetails.dart';
 import 'package:tourist_app/services/places_service.dart';
 import 'package:tourist_app/services/geolocator_service.dart';
 import 'package:tourist_app/screens/search.dart';
@@ -27,6 +28,8 @@ class _MainScreenState extends State<MainScreen> {
 
   GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
+  DirectionDetails tripDirectionDetails;
+
   List<LatLng> pLineCoordinates = [];
   Set<Polyline> polylineSet = {};
 
@@ -34,6 +37,15 @@ class _MainScreenState extends State<MainScreen> {
 
   Set<Marker> markerSet = {};
   Set<Circle> circlesSet = {};
+
+  double distanceContainerHeight = 0;
+
+  void displayDistanceContainer() async {
+    await getPlaceDirection();
+    setState(() {
+      distanceContainerHeight = 40;
+    });
+  }
 
   Position currentPosition;
   var geoLocator = Geolocator();
@@ -208,7 +220,7 @@ class _MainScreenState extends State<MainScreen> {
                                 builder: (context) => SearchScreen()));
 
                         if (res == "obtainDirection") {
-                          await getPlaceDirection();
+                          displayDistanceContainer();
                         }
                       },
                       child: Center(
@@ -356,27 +368,52 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
           ),
+          Center(
+            child: Container(
+                //height: MediaQuery.of(context).size.height / 3,
+                child: Column(
+              //mainAxisAlignment: MainAxisAlignment.center,
+              //crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                DropdownExample(),
+                ElevatedButton(
+                  child: Text('Locate'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MyApp2()),
+                    );
+                  },
+                ),
+              ],
+            )),
+          ),
           Positioned(
-              left: 10.0,
-              top: 0.0,
-              child: Container(
-                  //height: MediaQuery.of(context).size.height / 3,
-                  child: Column(
-                //mainAxisAlignment: MainAxisAlignment.center,
-                //crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  DropdownExample(),
-                  ElevatedButton(
-                    child: Text('Locate'),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => MyApp2()),
-                      );
-                    },
+            bottom: 280,
+            left: (screenWidth / 2) - 90,
+            child: Container(
+              width: 180,
+              height: distanceContainerHeight,
+              decoration: BoxDecoration(
+                color: Colors.black87,
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text("Distance : ",
+                          style: TextStyle(color: Colors.white)),
+                  Text((tripDirectionDetails!=null?tripDirectionDetails.distanceText:"0"),style: TextStyle(color: Colors.white)),
+
+                    ],
                   ),
-                ],
-              ))),
+                ),
+              ),
+            ),
+          )
         ],
       ),
     );
@@ -394,6 +431,10 @@ class _MainScreenState extends State<MainScreen> {
 
     var details = await AssistantMethods.obtainPlaceDirectionDetails(
         pickUpLatLng, dropOffLatLng);
+
+    setState(() {
+      tripDirectionDetails = details;
+    });
 
     print("This is encoded Points :: ");
     print(details.encodedPoints);
