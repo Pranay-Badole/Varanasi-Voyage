@@ -9,6 +9,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:tourist_app/Allscreens/searchScreen.dart';
 import 'package:tourist_app/Assistants/assistantMethods.dart';
 import 'package:tourist_app/DataHandler/appData.dart';
+import 'package:tourist_app/services/places_service.dart';
+import 'package:tourist_app/services/geolocator_service.dart';
+import 'package:tourist_app/screens/search.dart';
+import 'package:tourist_app/models/place.dart';
 
 class MainScreen extends StatefulWidget {
   static const String idScreen = "mainScreen";
@@ -35,7 +39,7 @@ class _MainScreenState extends State<MainScreen> {
   var geoLocator = Geolocator();
 
   void locatePosition() async {
-    Position position = await Geolocator.getCurrentPosition(
+    Position position = await geoLocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
     currentPosition = position;
 
@@ -352,6 +356,27 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
           ),
+          Positioned(
+              left: 10.0,
+              top: 0.0,
+              child: Container(
+                  //height: MediaQuery.of(context).size.height / 3,
+                  child: Column(
+                //mainAxisAlignment: MainAxisAlignment.center,
+                //crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  DropdownExample(),
+                  ElevatedButton(
+                    child: Text('Locate'),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => MyApp2()),
+                      );
+                    },
+                  ),
+                ],
+              ))),
         ],
       ),
     );
@@ -378,7 +403,8 @@ class _MainScreenState extends State<MainScreen> {
     pLineCoordinates.clear();
     if (decodedPolyLinePointsResult.isNotEmpty) {
       decodedPolyLinePointsResult.forEach((PointLatLng pointLatLng) {
-        pLineCoordinates.add(LatLng(pointLatLng.latitude, pointLatLng.longitude));
+        pLineCoordinates
+            .add(LatLng(pointLatLng.latitude, pointLatLng.longitude));
       });
     }
     polylineSet.clear();
@@ -397,7 +423,8 @@ class _MainScreenState extends State<MainScreen> {
     });
     Marker pickUpLocMarker = Marker(
       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
-      infoWindow: InfoWindow(title: initialPos.placeName, snippet: "my Location"),
+      infoWindow:
+          InfoWindow(title: initialPos.placeName, snippet: "my Location"),
       position: dropOffLatLng,
       markerId: MarkerId("dropOffId"),
     );
@@ -437,5 +464,190 @@ class _MainScreenState extends State<MainScreen> {
       markerSet.add(pickUpLocMarker);
       markerSet.add(dropOffLocMarker);
     });
+  }
+}
+
+class MyApp2 extends StatelessWidget {
+  final locatorService = GeoLocatorService();
+  final placesService = PlacesService();
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        FutureProvider(create: (context) => locatorService.getLocation()),
+        ProxyProvider<Position, Future<List<Place>>>(
+          update: (context, position, places) {
+            return (position != null)
+                ? placesService.getPlaces(position.latitude, position.longitude)
+                : null;
+          },
+        )
+      ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.teal,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        home: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              "Voyage!",
+              style: TextStyle(fontFamily: "Brand Bold"),
+            ),
+          ),
+          drawer: Container(
+            color: Colors.black,
+            width: 260.0,
+            child: Drawer(
+              child: ListView(
+                children: [
+                  Container(
+                    height: 165.0,
+                    child: DrawerHeader(
+                      decoration: BoxDecoration(color: Colors.white),
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            "images/user_icon.png",
+                            height: 55.0,
+                            width: 55.0,
+                          ),
+                          SizedBox(
+                            width: 16.0,
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Profile Name",
+                                style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontFamily: "Brand-Regular"),
+                              ),
+                              SizedBox(
+                                height: 6.0,
+                              ),
+                              Text("Visit Profile"),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  DividerWidget(),
+                  SizedBox(
+                    height: 12.0,
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.history),
+                    title: Text(
+                      "History",
+                      style: TextStyle(fontSize: 15.0),
+                    ),
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.person),
+                    title: Text(
+                      "Visit Profile",
+                      style: TextStyle(fontSize: 15.0),
+                    ),
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.info),
+                    title: Text(
+                      "About",
+                      style: TextStyle(fontSize: 15.0),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          body: Search(),
+        ),
+      ),
+    );
+  }
+}
+
+class DropdownExample extends StatefulWidget {
+  @override
+  _DropdownExampleState createState() {
+    return _DropdownExampleState();
+  }
+}
+
+class _DropdownExampleState extends State<DropdownExample> {
+  String _value = 'one';
+  var details = {
+    'one': 'atm',
+    'two': 'bank',
+    'three': 'bus_station',
+    'four': 'car_repair',
+    'five': 'gas_station',
+    'six': 'gas_station',
+    'seven': 'hospital',
+    'eight': 'pharmacy',
+    'nine': 'police',
+    'ten': 'post_office',
+  };
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: DropdownButton<String>(
+        items: [
+          DropdownMenuItem<String>(
+            child: Text('ATM'),
+            value: 'one',
+          ),
+          DropdownMenuItem<String>(
+            child: Text('Bank'),
+            value: 'two',
+          ),
+          DropdownMenuItem<String>(
+            child: Text('Bus Station'),
+            value: 'three',
+          ),
+          DropdownMenuItem<String>(
+            child: Text('Car repair'),
+            value: 'four',
+          ),
+          DropdownMenuItem<String>(
+            child: Text('Gas Station'),
+            value: 'five',
+          ),
+          DropdownMenuItem<String>(
+            child: Text('Gas Station'),
+            value: 'six',
+          ),
+          DropdownMenuItem<String>(
+            child: Text('Hospital'),
+            value: 'seven',
+          ),
+          DropdownMenuItem<String>(
+            child: Text('Pharmacy'),
+            value: 'eight',
+          ),
+          DropdownMenuItem<String>(
+            child: Text('Police Station'),
+            value: 'nine',
+          ),
+          DropdownMenuItem<String>(
+            child: Text('Post Office'),
+            value: 'ten',
+          ),
+        ],
+        onChanged: (String value) {
+          setState(() {
+            _value = value;
+            PlacesService.place = details[value];
+          });
+        },
+        hint: Text('Airport'),
+        value: _value,
+      ),
+    );
   }
 }
