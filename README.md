@@ -1,15 +1,13 @@
-# tourist_app
+# Trip_Planner
 
-A new Flutter application.
+# Description
 
-## Getting Started
+1. An app suitable for a tourist who is new to a place.
+2. Plan travel day-trips and utilize this information in multiple destination planning.
+3. Integrated Google maps and geolocation service to show the current location and nearby famous places.
+4. Emergency Services - Get the list of nearby essential services like ATM, Gas Station, Hospitals etc. and display routes to the selected destination .
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+Exposure - Flutter, Geocoding, FireBase, Google Maps API, Android Studio, Dart.
 
 For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
